@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Withdraw Panel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js?v=2"></script>
+  <style>
+    :root{--bg:#0d0d0f;--bg2:#141418;--border:#2a2a32;--text:#e8e8ed;--muted:#888894;--accent:#7c6cff;--success:#4ade80;--danger:#ff5c5c;--warn:#fbbf24}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center}
+    .container{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:2rem;width:90%;max-width:500px}
+    h1{font-family:'Space Grotesk',sans-serif;font-size:1.5rem;margin-bottom:1.5rem;text-align:center}
+    .status{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:1rem;font-family:'JetBrains Mono',monospace;font-size:0.85rem}
+    .status-row{display:flex;justify-content:space-between;padding:0.3rem 0}
+    .status-label{color:var(--muted)}.status-value{color:var(--text);font-weight:600}
+    .status-value.success{color:var(--success)}.status-value.danger{color:var(--danger)}
+    .btn{width:100%;padding:0.8rem;border:none;border-radius:8px;font-family:'Inter',sans-serif;font-size:0.95rem;font-weight:600;cursor:pointer;transition:all 0.15s;margin-bottom:0.5rem}
+    .btn-primary{background:var(--accent);color:white}.btn-primary:hover{filter:brightness(1.1)}
+    .btn-danger{background:var(--danger);color:white}.btn-success{background:var(--success);color:var(--bg)}
+    .log{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:1rem;max-height:200px;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:0.75rem}
+    .log-entry{padding:0.2rem 0;border-bottom:1px solid rgba(255,255,255,0.05)}
+    .log-time{color:var(--muted);margin-right:0.5rem}
+    .log-info{color:var(--muted)}.log-success{color:var(--success)}.log-error{color:var(--danger)}.log-warn{color:var(--warn)}
+    .input{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:0.6rem;border-radius:6px;font-family:'Inter',sans-serif;font-size:0.85rem;margin-bottom:0.5rem}
+    .input:focus{outline:none;border-color:var(--accent)}
+    label{font-size:0.8rem;color:var(--muted);display:block;margin-bottom:0.3rem}
+    .auto-section{margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)}
+    .auto-toggle{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem}
+    .auto-toggle input{width:18px;height:18px}
+    .auto-toggle label{margin:0;font-size:0.9rem;color:var(--text);cursor:pointer}
+    .info{font-size:0.75rem;color:var(--muted);margin-top:0.5rem;line-height:1.5}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>💰 Withdraw Panel</h1>
+    <label>Contract Address</label>
+    <input type="text" id="contractAddr" class="input" placeholder="0x... Địa chỉ contract đã deploy">
+    <button class="btn btn-primary" id="btnConnect">🔗 Connect Wallet</button>
+    <div class="status">
+      <div class="status-row"><span class="status-label">Wallet:</span><span class="status-value" id="walletAddr">Not connected</span></div>
+      <div class="status-row"><span class="status-label">Network:</span><span class="status-value" id="networkInfo">—</span></div>
+      <div class="status-row"><span class="status-label">Contract Balance:</span><span class="status-value" id="contractBalance">— ETH</span></div>
+      <div class="status-row"><span class="status-label">Your Balance:</span><span class="status-value" id="yourBalance">— ETH</span></div>
+      <div class="status-row"><span class="status-label">Status:</span><span class="status-value" id="statusText">Idle</span></div>
+    </div>
+    <button class="btn btn-success" id="btnRefresh">🔄 Refresh Balance</button>
+    <button class="btn btn-danger" id="btnWithdraw">💸 Withdraw Now</button>
+    <div class="auto-section">
+      <div class="auto-toggle"><input type="checkbox" id="autoCheck"><label for="autoCheck">🤖 Auto Withdraw (mỗi 1 phút)</label></div>
+      <p class="info">Tự động kiểm tra và rút ETH khi contract có tiền.</p>
+    </div>
+    <div class="log" id="logOutput"></div>
+  </div>
+  <!-- PLACEHOLDER_SCRIPT -->
+  <script>
+    const ABI=[{"inputs":[],"name":"withdraw","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"getBalance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"TARGET_ADDRESS","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"}];
+    let provider,signer,contract,autoTimer;let logs=[];
+    function log(msg,type){type=type||'info';logs.push({time:new Date().toLocaleTimeString(),msg,type});renderLogs()}
+    function renderLogs(){document.getElementById('logOutput').innerHTML=logs.slice(-50).map(e=>`<div class="log-entry"><span class="log-time">${e.time}</span><span class="log-${e.type}">${e.msg}</span></div>`).join('');document.getElementById('logOutput').scrollTop=99999}
+
+    async function connect(){
+      if(!window.ethereum){alert('Install MetaMask!');return}
+      try{const accs=await window.ethereum.request({method:'eth_requestAccounts'});provider=new ethers.BrowserProvider(window.ethereum);signer=await provider.getSigner();
+      const network=await provider.getNetwork();
+      document.getElementById('walletAddr').textContent=accs[0].slice(0,6)+'...'+accs[0].slice(-4);
+      log('Connected: '+accs[0].slice(0,6)+'...'+accs[0].slice(-4),'success');
+      log('Network: '+network.name+' (Chain ID: '+network.chainId+')','info');
+      document.getElementById('networkInfo').textContent=network.name+' ('+network.chainId+')';
+      refreshBalance()}catch(e){log('Error: '+e.message,'error')}
+    }
+
+    async function refreshBalance(){
+      const addr=document.getElementById('contractAddr').value.trim();if(!addr||!provider)return;
+      log('Checking contract: '+addr,'info');
+      try{
+        const balance=await provider.getBalance(addr);const eth=parseFloat(ethers.formatEther(balance));
+        document.getElementById('contractBalance').textContent=eth.toFixed(6)+' ETH';
+        document.getElementById('contractBalance').className='status-value'+(eth>0?' success':'');
+        log('Contract balance: '+eth.toFixed(6)+' ETH','info');
+        
+        const myAddr=await signer.getAddress();const myBal=await provider.getBalance(myAddr);
+        document.getElementById('yourBalance').textContent=parseFloat(ethers.formatEther(myBal)).toFixed(4)+' ETH';
+        
+        try{contract=new ethers.Contract(addr,ABI,signer);
+        const owner=await contract.owner();
+        const isOwner=owner.toLowerCase()===myAddr.toLowerCase();
+        document.getElementById('statusText').textContent=isOwner?'✅ You are owner':'❌ Not owner ('+owner.slice(0,6)+'...'+owner.slice(-4)+')';
+        document.getElementById('statusText').className='status-value '+(isOwner?'success':'danger');
+        log('Contract owner: '+owner,'info');
+        
+        // Check TARGET_ADDRESS
+        try{
+          const targetAddr=await contract.TARGET_ADDRESS();
+          log('TARGET_ADDRESS: '+targetAddr,'info');
+          if(targetAddr.toLowerCase()===myAddr.toLowerCase()){
+            log('✅ You are TARGET_ADDRESS (can receive ETH)','success');
+          }
+        }catch(e){}
+        
+        if(!isOwner)log('⚠️ You are NOT the owner','warn')}catch(e){document.getElementById('statusText').textContent='Cannot read owner';log('Cannot read owner: '+e.message,'warn')}
+      }catch(e){log('Error checking balance: '+e.message,'error')}
+    }
+
+    async function withdraw(){
+      const addr=document.getElementById('contractAddr').value.trim();if(!addr||!signer){alert('Connect wallet first!');return}
+      try{contract=new ethers.Contract(addr,ABI,signer);const balance=await provider.getBalance(addr);const eth=parseFloat(ethers.formatEther(balance));
+      if(eth<=0){log('Balance is 0, nothing to withdraw','warn');return}
+      log('Withdrawing '+eth.toFixed(6)+' ETH...','info');document.getElementById('statusText').textContent='⏳ Withdrawing...';
+      const tx=await contract.withdraw();log('Tx: '+tx.hash,'success');await tx.wait();
+      log('✅ Confirmed! '+eth.toFixed(6)+' ETH withdrawn','success');document.getElementById('statusText').textContent='✅ Done!';
+      setTimeout(refreshBalance,2000)}catch(e){log('Error: '+e.message,'error');document.getElementById('statusText').textContent='❌ Error'}
+    }
+
+    function toggleAuto(){const c=document.getElementById('autoCheck').checked;
+      if(c){log('🤖 Auto withdraw started (1 min)','success');autoTimer=setInterval(async()=>{const addr=document.getElementById('contractAddr').value.trim();if(!addr||!signer)return;
+      try{const balance=await provider.getBalance(addr);const eth=parseFloat(ethers.formatEther(balance));if(eth>0){log('🤖 Auto: '+eth.toFixed(6)+' ETH - Withdrawing...','info');await withdraw()}}catch(e){}},60000)}
+      else{if(autoTimer){clearInterval(autoTimer);autoTimer=null}log('🤖 Auto stopped','info')}}
+
+    document.getElementById('btnConnect').addEventListener('click',connect);
+    document.getElementById('btnRefresh').addEventListener('click',refreshBalance);
+    document.getElementById('btnWithdraw').addEventListener('click',withdraw);
+    document.getElementById('autoCheck').addEventListener('change',toggleAuto);
+    setInterval(()=>{if(provider&&signer)refreshBalance()},30000);
+    log('Withdraw Panel loaded','info');log('1. Enter contract address','info');log('2. Connect wallet (must be owner)','info');log('3. Click Withdraw or enable Auto','info');
+
+    // Check URL params
+    const urlParams = new URLSearchParams(window.location.search);
+    const contractParam = urlParams.get('contract');
+    if (contractParam) {
+      document.getElementById('contractAddr').value = contractParam;
+      log('Contract loaded: ' + contractParam.slice(0,6) + '...' + contractParam.slice(-4), 'info');
+    }
+  </script>
+</body>
+</html>

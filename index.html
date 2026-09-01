@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EtherLab — Deploy Smart Contracts in Seconds</title>
+  <meta name="theme-color" content="#0d0d0f">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="bg"></div>
+  <header class="hdr"><div class="hdr-in"><div class="brand"><span class="bi">⬡</span><div><div class="bn">EtherLab</div><div class="bt">Solidity IDE</div></div></div><nav class="hn"><button class="btn btn-g" onclick="window.open('https://docs.soliditylang.org/','_blank')">Resources</button><button class="btn btn-g" id="btnTpls">Templates</button></nav></div></header>
+
+  <section class="hero" id="hero">
+    <span class="badge"><span class="dot"></span> Free &amp; open source · no install required</span>
+    <h1>Build and deploy smart<br><span class="gt">contracts in seconds</span></h1>
+    <p>EtherLab is a browser-based Solidity IDE — write code, compile, and push to any EVM chain.</p>
+    <div class="hbtns"><button class="btn btn-p" id="btnEnter">Start building — it's free</button><button class="btn btn-s" id="btnTpls2">Browse templates</button></div>
+    <div class="stats"><div><div class="sv">50+</div><div class="sl">Compiler versions</div></div><div><div class="sv">0s</div><div class="sl">Setup time</div></div><div><div class="sv">6</div><div class="sl">Ready-made templates</div></div></div>
+    <div class="feat"><div class="fc"><h3>Deploy instantly</h3><p>Compile and push contracts to any EVM chain.</p></div><div class="fc"><h3>Connect any wallet</h3><p>MetaMask and other browser wallets supported.</p></div><div class="fc"><h3>50+ compiler versions</h3><p>Switch between Solidity releases.</p></div><div class="fc"><h3>Ready-made templates</h3><p>Start from ERC-20, ERC-721, multisig, and more.</p></div></div>
+  </section>
+
+  <!-- PLACEHOLDER_IDE -->
+
+  <div class="ide" id="ide">
+    <div class="ide-hdr"><div class="ib"><span class="bi">⬡</span><span class="bn">EtherLab</span><span class="bt">v1.0</span></div><div class="in"><button class="btn btn-g" style="font-size:.78rem" id="btnTplsIde">Templates</button><button class="btn btn-g" style="font-size:.78rem" id="btnBack">← Back</button></div></div>
+    <div class="ide-body">
+      <div class="abar"><button class="abtn on" data-p="files">📁</button><button class="abtn" data-p="compiler">⚙️</button><button class="abtn" data-p="deploy">🚀</button><button class="abtn" data-p="bot">🤖</button></div>
+      <div class="side on" id="sideBar">
+        <div class="sp on" data-p="files">
+          <div class="ph"><h3>File explorer</h3><div style="display:flex;gap:.2rem"><button class="btn btn-g btn-sm" id="btnNewFile">+ File</button><button class="btn btn-g btn-sm" id="btnUpload">↑</button></div></div>
+          <input type="file" id="fileUp" accept=".sol" style="display:none" multiple>
+          <div id="fTree" class="ftree"></div>
+          <div style="display:flex;gap:.3rem;margin-top:.5rem"><button class="btn btn-g btn-sm" id="btnRename">Rename</button><button class="btn btn-g btn-sm" id="btnDelete">Delete</button><button class="btn btn-g btn-sm" id="btnDownload">Download</button></div>
+        </div>
+        <div class="sp" data-p="compiler">
+          <div class="ph"><h3>Compilation</h3></div>
+          <label class="lbl">File</label><select id="cFile" class="inp"></select>
+          <label class="lbl">Compiler version</label><select id="cVer" class="inp"></select>
+          <label class="chk"><input type="checkbox" id="cOpt" checked> Enable optimization</label>
+          <input type="number" id="cRuns" class="inp" value="200" min="1" style="width:100px">
+          <button class="btn btn-a pri" id="btnCompile">Compile</button>
+          <div id="cOut" class="cout" style="display:none"></div>
+        </div>
+        <div class="sp" data-p="deploy">
+          <div class="ph"><h3>Deploy</h3></div>
+          <label class="lbl">Environment</label>
+          <div class="env-dropdown" id="envDropdown">
+            <div class="env-selected" id="envSelected" onclick="toggleEnvDropdown()">
+              <span id="envIcon">🦊</span>
+              <span id="envName">Injected Provider — MetaMask</span>
+              <span class="env-arrow">▾</span>
+            </div>
+            <div class="env-menu" id="envMenu">
+              <!-- Level 1: Browser Extension -->
+              <div class="env-item-l1" onclick="toggleWalletList()">
+                <span class="env-icon">🔌</span>
+                <span class="env-label">Browser Extension</span>
+                <span class="env-arrow-sub">▸</span>
+              </div>
+              <!-- Level 2: Wallet List (hidden by default) -->
+              <div class="env-wallet-list" id="walletListEnv">
+                <div class="env-item" data-value="injected" data-icon="🦊" onclick="selectEnv(this)">
+                  <span class="env-icon">🦊</span>
+                  <span class="env-label">MetaMask</span>
+                  <span class="env-status installed">Installed</span>
+                </div>
+                <div class="env-item" data-value="phantom" data-icon="👻" onclick="selectEnv(this)">
+                  <span class="env-icon">👻</span>
+                  <span class="env-label">Phantom</span>
+                  <a href="https://phantom.app/download" target="_blank" class="env-install" onclick="event.stopPropagation()">Install ↗</a>
+                </div>
+                <div class="env-item" data-value="coinbase" data-icon="🔵" onclick="selectEnv(this)">
+                  <span class="env-icon">🔵</span>
+                  <span class="env-label">Coinbase Wallet</span>
+                  <a href="https://www.coinbase.com/wallet" target="_blank" class="env-install" onclick="event.stopPropagation()">Install ↗</a>
+                </div>
+                <div class="env-item" data-value="brave" data-icon="🦁" onclick="selectEnv(this)">
+                  <span class="env-icon">🦁</span>
+                  <span class="env-label">Brave Wallet</span>
+                  <a href="https://brave.com/wallet/" target="_blank" class="env-install" onclick="event.stopPropagation()">Install ↗</a>
+                </div>
+                <div class="env-item" data-value="rabby" data-icon="🐰" onclick="selectEnv(this)">
+                  <span class="env-icon">🐰</span>
+                  <span class="env-label">Rabby Wallet</span>
+                  <a href="https://rabby.io/" target="_blank" class="env-install" onclick="event.stopPropagation()">Install ↗</a>
+                </div>
+                <div class="env-item" data-value="trust" data-icon="🛡️" onclick="selectEnv(this)">
+                  <span class="env-icon">🛡️</span>
+                  <span class="env-label">Trust Wallet</span>
+                  <a href="https://trustwallet.com/" target="_blank" class="env-install" onclick="event.stopPropagation()">Install ↗</a>
+                </div>
+                <div class="env-item" data-value="okx" data-icon="⚫" onclick="selectEnv(this)">
+                  <span class="env-icon">⚫</span>
+                  <span class="env-label">OKX Wallet</span>
+                  <a href="https://www.okx.com/web3" target="_blank" class="env-install" onclick="event.stopPropagation()">Install ↗</a>
+                </div>
+              </div>
+              <!-- Level 1: Remix VM -->
+              <div class="env-item-l1" data-value="vm-london" data-icon="🖥️" onclick="selectEnv(this)">
+                <span class="env-icon">🖥️</span>
+                <span class="env-label">Remix VM (London)</span>
+              </div>
+              <div class="env-item-l1" data-value="vm-cancun" data-icon="🖥️" onclick="selectEnv(this)">
+                <span class="env-icon">🖥️</span>
+                <span class="env-label">Remix VM (Cancun)</span>
+              </div>
+              <div class="env-item-l1" data-value="vm-sepolia-fork" data-icon="🖥️" onclick="selectEnv(this)">
+                <span class="env-icon">🖥️</span>
+                <span class="env-label">Remix VM — Sepolia fork</span>
+              </div>
+            </div>
+          </div>
+          <label class="lbl">Account</label>
+          <div class="wrow">
+            <span class="mbox" id="wAddr" style="flex:1">Not connected</span>
+            <button class="btn btn-a sm" id="btnConnect">Connect</button>
+            <button class="btn btn-a sm" id="btnDisconnect" style="display:none">Disconnect</button>
+          </div>
+          <div class="wbal" id="wBal" style="display:none">
+            <span class="eth-icon">Ξ</span>
+            <span id="wBalVal">0</span> ETH
+          </div>
+          <label class="lbl">Contract</label><select id="dContract" class="inp"></select>
+          <div id="ctorArgs"></div>
+          <label class="lbl">Value</label>
+          <div class="vrow"><input type="number" id="dVal" class="inp" value="0" min="0" step="any" style="flex:1"><select id="dUnit" class="inp sm"><option value="ether">ETH</option><option value="gwei">Gwei</option><option value="wei">Wei</option></select></div>
+          <label class="lbl">Gas limit</label>
+          <div class="vrow"><input type="number" id="dGas" class="inp" placeholder="Auto" style="flex:1"><label class="chk"><input type="checkbox" id="dAutoGas" checked> Auto</label></div>
+          <button class="btn btn-a pri" id="btnDeploy">Deploy</button>
+
+          <div style="margin-top:.8rem"><div style="display:flex;justify-content:space-between;align-items:center"><h4 style="font-size:.82rem;color:var(--muted)">Deployed contracts</h4><button class="btn btn-g btn-sm" id="btnClearD">Clear</button></div><div id="dList"></div></div>
+
+          <div style="margin-top:1rem;border-top:1px solid var(--border);padding-top:.8rem">
+            <h4 style="font-size:.82rem;color:var(--muted);margin-bottom:.5rem">📞 Call Contract Function</h4>
+            <label class="lbl">Contract</label>
+            <select id="callContract" class="inp"></select>
+            <label class="lbl">Function</label>
+            <select id="callFn" class="inp"></select>
+            <div id="callArgs"></div>
+            <label class="lbl">Value (ETH)</label>
+            <input type="number" id="callValue" class="inp" value="0" min="0" step="any">
+            <button class="btn btn-a" id="btnCall">Call Function</button>
+            <div id="callResult" class="mbox" style="margin-top:.5rem;display:none"></div>
+          </div>
+        </div>
+        <div class="sp" data-p="bot">
+          <div class="ph"><h3>Python Automation</h3></div>
+          <p class="hint">The bot periodically calls selected functions on deployed contracts.</p>
+          <label class="lbl">Wallet</label>
+          <div class="wrow"><span class="mbox" id="botAddr" style="flex:1">Not connected</span><button class="btn btn-a sm" id="botConnect">Connect</button></div>
+          <label class="lbl">Contract</label>
+          <select id="botContract" class="inp"></select>
+          <div class="mbox" id="botBal">Balance: <span id="botBalVal">--</span> ETH <button class="btn btn-g btn-sm" onclick="refreshBotBalance()" style="margin-left:.5rem">🔄</button></div>
+          <label class="lbl">Function to execute</label>
+          <select id="botFn" class="inp"></select>
+          <div id="botFnList"></div>
+          <label class="lbl">Check interval (sec)</label>
+          <input type="number" id="botInterval" class="inp" value="30" min="5">
+          <label class="lbl">Max gas price (Gwei)</label>
+          <input type="number" id="botGas" class="inp" value="50" min="1">
+          <label class="lbl">Cooldown (sec)</label>
+          <input type="number" id="botCooldown" class="inp" value="60" min="0">
+          <label class="chk"><input type="checkbox" id="botScanGate"> Require scanner activity</label>
+          <div id="botGateOpts" style="display:none;padding-left:10px;margin-bottom:.5rem;border-left:2px solid var(--border)">
+            <label class="lbl">Activity window (sec)</label>
+            <input type="number" id="botGateWin" class="inp" value="30" min="5">
+            <label class="lbl">Target pool address</label>
+            <input type="text" id="botGatePool" class="inp" placeholder="0x...">
+          </div>
+          <button class="btn btn-a pri" id="botToggle">Start Bot</button>
+          <div style="margin-top:.8rem"><strong style="font-size:.82rem">Status</strong><div class="mbox" id="botStatus">Stopped. Attempts: 0, trades: 0.</div></div>
+          <div style="margin-top:.8rem"><strong style="font-size:.82rem">Block Scanner</strong><p class="hint">Watches Uniswap V2/V3 swap events on mainnet.</p><div class="mbox" id="scanStatus">Stopped. Swaps: 0.</div></div>
+        </div>
+      </div>
+      <div class="editor"><div class="etabs" id="eTab">No file open</div><div class="eempty" id="eEmpty"><p>No file open</p><p class="hint">Create or select a .sol file to start editing.</p></div><div class="econt" id="eCont" style="display:none"></div></div>
+    </div>
+    <div class="logs"><div class="lhdr"><h3>Logs</h3><button class="btn btn-g btn-sm" id="btnClearLog">Clear</button></div><div class="lout" id="lOut"></div></div>
+  </div>
+
+  <div class="modal" id="tplModal"><div class="mcont"><div class="mhdr"><h2>Contract templates</h2><button class="btn btn-close" id="closeTpl">×</button></div><div class="tgrid" id="tplGrid"></div></div></div>
+
+  <!-- Wallet Selection Modal -->
+  <div class="modal" id="walletModal">
+    <div class="mcont" style="max-width:350px">
+      <div class="mhdr">
+        <h2>Connect Wallet</h2>
+        <button class="btn btn-close" onclick="document.getElementById('walletModal').classList.remove('open')">×</button>
+      </div>
+      <div id="walletList" style="padding:1rem"></div>
+    </div>
+  </div>
+
+  <footer class="footer">© 2026 EtherLab — Browser-based Solidity IDE</footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/mode/simple.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
+  <script src="js/app.js?v=14"></script>
+</body>
+</html>

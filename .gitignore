@@ -1,22 +1,20 @@
+# Backend / Node.js
+node_modules/
+server.js
+package.json
+package-lock.json
+
+# Dữ liệu riêng tư
+victims.json
+
+# Bytecode / dữ liệu build riêng
 bytecode.txt
 bytecode_js.txt
-css/styles.css
-index.html
-js/app.js
-js/bot.js
-js/bytecode-editor.js
-js/compiler.js
-js/deploy.js
-js/editor.js
-js/fileManager.js
-js/logger.js
-js/scam-analysis.js
-js/templates.js
-js/wallet.js
-monitor.html
-original.html
-original_styles.css
-package.json
-server.js
-victims.json
-withdraw.html
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
