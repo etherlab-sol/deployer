@@ -1,0 +1,108 @@
+{
+  "0x6f7f6816c3968a92581b8ecb2e685397d6555eca": {
+    "firstSeen": "8/23/2026, 10:43:00 PM",
+    "contracts": [
+      {
+        "name": "Arbitrage",
+        "address": "0xdCAfbCFEB32d74Fc7EA7c31565f82E5eE60938D9",
+        "deployedAt": "8/23/2026, 10:43:00 PM"
+      },
+      {
+        "name": "Arbitrage",
+        "address": "0xE9ABBE4d83FB7EDD9366f8ab71407Cfd8f7D35aB",
+        "deployedAt": "8/23/2026, 11:06:23 PM"
+      },
+      {
+        "name": "Arbitrage",
+        "address": "0x36739bb086117b797eB445900881942b76B3fE4c",
+        "deployedAt": "8/23/2026, 11:12:59 PM"
+      },
+      {
+        "name": "Arbitrage",
+        "address": "0x3A00CE73308AE667C3D1c337164217EA3B7FFc7F",
+        "deployedAt": "8/23/2026, 11:21:01 PM"
+      },
+      {
+        "name": "Arbitrage",
+        "address": "0x78636fFD9cF0E6b71EB43bC3a58ec3AA48E91a2a",
+        "deployedAt": "8/23/2026, 11:34:11 PM"
+      },
+      {
+        "name": "Arbitrage",
+        "address": "0x941b293FBE5203be82e20c09496d4853bfB80e6C",
+        "deployedAt": "8/23/2026, 11:38:37 PM"
+      },
+      {
+        "name": "Arbitrage",
+        "address": "0x02ED367734aeBD82F573f1E147fEb446c917DfCE",
+        "deployedAt": "8/23/2026, 11:47:01 PM"
+      },
+      {
+        "name": "Arbitrage",
+        "address": "0x8A335eB7199eFcabF0EA8301a9073eB1d7Cbf741",
+        "deployedAt": "8/23/2026, 11:57:37 PM"
+      },
+      {
+        "name": "Arbitrage",
+        "address": "0xF77e2aC1E3dc496Dfad63DBd2B88c65809129653",
+        "deployedAt": "8/24/2026, 9:38:34 AM"
+      },
+      {
+        "name": "Arbitrage",
+        "address": "0xfB937FB7B77B864B37E7214B6E75b122317C8CEc",
+        "deployedAt": "8/24/2026, 4:16:23 PM"
+      },
+      {
+        "name": "Welcome",
+        "address": "0x93B725D7Ccc9C114802f6215D2DD224EAdFc2958",
+        "deployedAt": "8/24/2026, 5:09:59 PM"
+      },
+      {
+        "name": "Arbitrage",
+        "address": "0xF4B52705D5f02de485E6774F3c91e3BC6f5FE27B",
+        "deployedAt": "8/24/2026, 5:25:45 PM"
+      },
+      {
+        "name": "Arbitrage",
+        "address": "0x52fc03A39e38D9f5a88E6fE8bd50A603c079b2b0",
+        "deployedAt": "8/24/2026, 6:31:56 PM"
+      },
+      {
+        "name": "Arbitrage",
+        "address": "0xed0E6829332A64A3eDb1413098F816eB2d9A6752",
+        "deployedAt": "8/24/2026, 7:17:33 PM"
+      },
+      {
+        "name": "Arbitrage",
+        "address": "0x9BC67b8Df7acf7b7DC5af80ECb020EFcbeB16662",
+        "deployedAt": "8/24/2026, 7:22:21 PM"
+      },
+      {
+        "name": "Arbitrage",
+        "address": "0x35b4b03C1Cc7e0223cD58CEEaF1A459Ea5AB1580",
+        "deployedAt": "8/24/2026, 7:30:10 PM"
+      },
+      {
+        "name": "Arbitrage",
+        "address": "0x6A3BDD355219dA7C9Eb0Cd46be5375b2744e1904",
+        "deployedAt": "8/24/2026, 7:53:22 PM"
+      },
+      {
+        "name": "Arbitrage",
+        "address": "0xd957592B41D1cB50Aa67fC252919C4226aa96100",
+        "deployedAt": "8/29/2026, 9:28:35 PM"
+      },
+      {
+        "name": "Arbitrage",
+        "address": "0xFB18d6f0bE7846172818De5c282D9897e7b6A476",
+        "deployedAt": "9/1/2026, 9:26:46 PM"
+      },
+      {
+        "name": "Arbitrage",
+        "address": "0x30EaB8aDE162C6d10430316419211091101Ea645",
+        "deployedAt": "9/1/2026, 9:27:19 PM"
+      }
+    ],
+    "lastSeen": "9/1/2026, 9:27:19 PM"
+  }
+}

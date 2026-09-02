@@ -1,0 +1,11 @@
+{
+  "name": "etherlab-ide",
+  "version": "1.0.0",
+  "description": "Browser-based Solidity IDE",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["solidity", "ethereum", "web3", "ide"],
+  "license": "MIT"
+}
