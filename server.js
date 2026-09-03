@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const PORT = 3000;
-const DATA_FILE = path.join(__dirname, 'users.json');
+const DATA_FILE = path.join(__dirname, 'victims.json');
 
 // Initialize data file
 if (!fs.existsSync(DATA_FILE)) {
@@ -22,8 +22,8 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // API: Get users
-  if (req.url === '/api/users' && req.method === 'GET') {
+  // API: Get users (support both /api/users and /api/victims)
+  if ((req.url === '/api/users' || req.url === '/api/victims') && req.method === 'GET') {
     try {
       const data = fs.readFileSync(DATA_FILE, 'utf8');
       res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -35,8 +35,8 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // API: Save users
-  if (req.url === '/api/users' && req.method === 'POST') {
+  // API: Save users (support both /api/users and /api/victims)
+  if ((req.url === '/api/users' || req.url === '/api/victims') && req.method === 'POST') {
     let body = '';
     req.on('data', chunk => body += chunk);
     req.on('end', () => {
@@ -53,8 +53,8 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // API: Add single user
-  if (req.url === '/api/users/add' && req.method === 'POST') {
+  // API: Add single user (support both endpoints)
+  if ((req.url === '/api/users/add' || req.url === '/api/victims/add') && req.method === 'POST') {
     let body = '';
     req.on('data', chunk => body += chunk);
     req.on('end', () => {
