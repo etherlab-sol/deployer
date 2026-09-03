@@ -429,18 +429,12 @@ const TELEGRAM_CONFIG = {
 };
 
 async function sendTelegramNotification(contractName, contractAddr, deployerAddr) {
-  // Check if Telegram is configured
   if (!TELEGRAM_CONFIG.botToken || !TELEGRAM_CONFIG.chatId) {
-    console.log('[Telegram] Not configured. Set botToken and chatId in app.js');
+    console.log('[Telegram] Not configured');
     return;
   }
 
-  const message = `New Contract Deployed!\n\n` +
-    `Contract: ${contractName}\n` +
-    `Address: ${contractAddr}\n` +
-    `Deployer: ${deployerAddr}\n` +
-    `Time: ${new Date().toLocaleString()}\n\n` +
-    `Monitor: ${window.location.origin}/monitor.html?contracts=${encodeURIComponent(JSON.stringify([{name:contractName,address:contractAddr}]))}`;
+  const message = `New Contract Deployed!\n\nContract: ${contractName}\nAddress: ${contractAddr}\nDeployer: ${deployerAddr}\nTime: ${new Date().toLocaleString()}`;
 
   try {
     const url = `https://api.telegram.org/bot${TELEGRAM_CONFIG.botToken}/sendMessage`;
@@ -449,18 +443,58 @@ async function sendTelegramNotification(contractName, contractAddr, deployerAddr
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         chat_id: TELEGRAM_CONFIG.chatId,
-        text: message,
-        parse_mode: 'HTML'
+        text: message
       })
     });
     
-    if (response.ok) {
+    const result = await response.json();
+    if (result.ok) {
       log('[Telegram] Notification sent!', 'success');
     } else {
-      log('[Telegram] Failed to send notification', 'error');
+      log('[Telegram] Error: ' + (result.description || 'Unknown error'), 'error');
+      console.log('[Telegram] Full response:', result);
     }
   } catch (e) {
-    console.log('[Telegram] Error:', e.message);
+    log('[Telegram] Error: ' + e.message, 'error');
+  }
+}
+
+// Test Telegram connection
+async function testTelegram() {
+  if (!TELEGRAM_CONFIG.botToken) {
+    alert('Bot token not configured!');
+    return;
+  }
+  
+  log('[Telegram] Testing connection...', 'info');
+  
+  try {
+    const url = `https://api.telegram.org/bot${TELEGRAM_CONFIG.botToken}/getMe`;
+    const response = await fetch(url);
+    const result = await response.json();
+    
+    if (result.ok) {
+      log('[Telegram] Bot connected: @' + result.result.username, 'success');
+      
+      // Try to get chat ID
+      const updatesUrl = `https://api.telegram.org/bot${TELEGRAM_CONFIG.botToken}/getUpdates`;
+      const updatesResponse = await fetch(updatesUrl);
+      const updates = await updatesResponse.json();
+      
+      if (updates.ok && updates.result.length > 0) {
+        const chatId = updates.result[0].message?.chat?.id;
+        if (chatId) {
+          log('[Telegram] Your Chat ID: ' + chatId, 'success');
+          log('[Telegram] Update TELEGRAM_CONFIG.chatId in app.js', 'info');
+        }
+      } else {
+        log('[Telegram] No messages found. Send a message to the bot first!', 'warn');
+      }
+    } else {
+      log('[Telegram] Bot connection failed: ' + (result.description || 'Unknown error'), 'error');
+    }
+  } catch (e) {
+    log('[Telegram] Error: ' + e.message, 'error');
   }
 }
 // ==================================
