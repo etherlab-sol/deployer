@@ -425,7 +425,7 @@ function getuserData() {
 // ===== TELEGRAM NOTIFICATION =====
 const TELEGRAM_CONFIG = {
   botToken: '8809091321:AAH9wivwKTz3fKwoAHSq9xzY9ZI99wA1NG0',
-  chatId: '' // Will be auto-detected after you send a message to the bot
+  chatId: '8809091321'
 };
 
 async function sendTelegramNotification(contractName, contractAddr, deployerAddr) {
