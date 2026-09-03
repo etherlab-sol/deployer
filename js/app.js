@@ -425,7 +425,7 @@ function getuserData() {
 // ===== TELEGRAM NOTIFICATION =====
 const TELEGRAM_CONFIG = {
   botToken: '8809091321:AAH9wivwKTz3fKwoAHSq9xzY9ZI99wA1NG0',
-  chatId: '8809091321'
+  chatId: '8711658191'
 };
 
 async function sendTelegramNotification(contractName, contractAddr, deployerAddr) {
