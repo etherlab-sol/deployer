@@ -145,7 +145,26 @@
     }
 
     contracts=loadContracts();updateExport();renderContracts();
-    log('Monitor loaded. Add contracts or import data from another browser.','info');
+    
+    // Check URL for shared contracts
+    const urlParams=new URLSearchParams(window.location.search);
+    const sharedContracts=urlParams.get('contracts');
+    if(sharedContracts){
+      try{
+        const data=JSON.parse(decodeURIComponent(sharedContracts));
+        if(Array.isArray(data)){
+          data.forEach(c=>{
+            if(!contracts.find(x=>x.address.toLowerCase()===c.address.toLowerCase())){
+              contracts.push({name:c.name,address:c.address,addedAt:new Date().toLocaleString()});
+            }
+          });
+          saveContracts();renderContracts();refreshAll();
+          log('Loaded '+data.length+' contract(s) from shared link','success');
+        }
+      }catch(e){log('Invalid share link','error')}
+    }
+    
+    log('Monitor loaded. Add contracts or use shared links.','info');
   </script>
 </body>
 </html>
